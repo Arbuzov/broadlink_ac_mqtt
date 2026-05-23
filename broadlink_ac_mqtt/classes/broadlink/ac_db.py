@@ -289,8 +289,11 @@ class device:
 
 					break
 				except socket.timeout:
+					##Retry within the configured timeout window. The original
+					##"pass" fell through to the raise and aborted on the first
+					##1s timeout (issue #101); use continue to actually retry.
 					if (time.time() - starttime) < self.timeout:
-						pass
+						continue
 					raise ConnectTimeout(200,self.host)
 		return bytearray(response[0])
 
@@ -1295,9 +1298,11 @@ class ac_db_debug(device):
 					#print response
 					break
 				except socket.timeout:
+					##Retry within the configured timeout window. The original
+					##"pass" fell through to the raise and aborted on the first
+					##1s timeout (issue #101); use continue to actually retry.
 					if (time.time() - starttime) < self.timeout:
-						pass
-					#print "timedout"
+						continue
 					raise ConnectTimeout(200,self.host)
 		return bytearray(response[0])	
 

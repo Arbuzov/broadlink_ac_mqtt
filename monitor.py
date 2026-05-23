@@ -41,7 +41,8 @@ def discover_and_dump_for_config(config):
 	print ("*********** start copy below ************")
 	for device in devices.values():
 		yaml_devices.append(
-			{'name':device.name.encode('ascii','ignore'),
+			##decode back to str so PyYAML emits a plain string, not a !!binary blob
+			{'name':device.name.encode('ascii','ignore').decode('ascii'),
 			'ip':device.host[0]
 			,'port':device.host[1]
 			,'mac':device.status['macaddress']}
