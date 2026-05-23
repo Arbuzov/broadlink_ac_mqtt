@@ -117,14 +117,22 @@ class AcToMqtt:
 						#print "timeout done"					
 			
 				##Get the status, the global update interval is used as well to reduce requests to aircons as they slow
-				
-				status = device.get_ac_status()						
-				
+				##Isolate each device: a timeout/error talking to one unit must
+				##not abort polling of the others (previously a single
+				##ConnectTimeout broke the whole loop and every device went
+				##"unavailable" in Home Assistant until a restart).
+				try:
+					status = device.get_ac_status()
+				except Exception as e:
+					logger.warning("Polling device %s failed: %s" % (key, e))
+					logger.debug(traceback.format_exc())
+					continue
+
 				#print status
 				if status:
 					##Update last time checked
-					self.last_update[key] = time.time()						
-					self.publish_mqtt_info(status)		
+					self.last_update[key] = time.time()
+					self.publish_mqtt_info(status)
 
 				else:
 					logger.debug("No status")				
