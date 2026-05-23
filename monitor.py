@@ -103,21 +103,39 @@ def stop_if_already_running():
 	if(check_if_running()):		
 		sys.exit()
 
-def init_logging(level,log_file_path):
-		
+def parse_log_level(value, default=logging.INFO):
+	"""Accept names (DEBUG/INFO/...) or numeric levels; fall back to default."""
+	if value is None or value == "":
+		return default
+	if isinstance(value, int):
+		return value
+	text = str(value).strip()
+	if text.isdigit():
+		return int(text)
+	level = logging.getLevelName(text.upper())
+	if isinstance(level, int):
+		return level
+	return default
+
+def init_logging(level,log_file_path,console_level=None):
+
+		if console_level is None:
+			# Default: never noisier on console than DEBUG, never quieter than INFO
+			console_level = max(level, logging.INFO) if level > logging.INFO else logging.INFO
+
 		# Init logging
 		logging.basicConfig(
 			filename=log_file_path,
 			level=level,
 			format="%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
-		 
+
 		)
-		
+
 		console = logging.StreamHandler()
-		console.setLevel(logging.INFO)
+		console.setLevel(console_level)
 		# set a format which is simpler for console use
 		formatter = logging.Formatter('%(message)s')
-		
+
 		# tell the handler to use this format
 		console.setFormatter(formatter)
 		logging.getLogger('').addHandler(console)
@@ -265,14 +283,22 @@ def start():
 			config_file_path = data_dir+'\\settings\config.yml'
 		
 	
-	##LogFile
-	if args.logfile:			
-		log_file_path = args.logfile			 
-	else:			
+	##LogFile -- CLI > env LOG_FILE > default
+	if args.logfile:
+		log_file_path = args.logfile
+	elif os.environ.get("LOG_FILE"):
+		log_file_path = os.environ["LOG_FILE"]
+	else:
 		log_file_path = os.path.dirname(os.path.realpath(__file__))+'/log/out.log'
-		
-	log_level = logging.DEBUG if args.debug else logging.INFO
-	init_logging(log_level,log_file_path)
+
+	##Log level -- --debug wins, then LOG_LEVEL env, then INFO default
+	if args.debug:
+		log_level = logging.DEBUG
+	else:
+		log_level = parse_log_level(os.environ.get("LOG_LEVEL"), logging.INFO)
+
+	console_level = parse_log_level(os.environ.get("LOG_LEVEL_CONSOLE"), None)
+	init_logging(log_level,log_file_path,console_level)
 	
 	logger.debug("%s v%s is starting up" % (__file__, softwareversion))
 	logLevel = {0: 'NOTSET', 10: 'DEBUG', 20: 'INFO', 30: 'WARNING', 40: 'ERROR'}

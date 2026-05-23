@@ -102,6 +102,23 @@ Dump all discovered devices so one can copy paste
 ./monitor.py -S
 ```
 
+### Environment variables
+
+Useful when running in Docker / Home Assistant add-on where CLI flags are awkward to pass:
+
+| Variable           | Effect                                                                                  | Example values                          |
+|--------------------|-----------------------------------------------------------------------------------------|-----------------------------------------|
+| `LOG_LEVEL`        | Root log level (file). Ignored if `--debug` is passed (which forces DEBUG).             | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
+| `LOG_LEVEL_CONSOLE`| Override the console handler level only. By default the console stays at INFO so DEBUG noise goes to the file only. | same as above                           |
+| `LOG_FILE`         | Path to the log file. Overridden by `--logfile`.                                        | `/var/log/broadlink_ac_mqtt.log`        |
+
+Precedence: CLI flag > environment variable > built-in default.
+
+```
+LOG_LEVEL=WARNING ./monitor.py
+LOG_LEVEL=DEBUG LOG_LEVEL_CONSOLE=DEBUG LOG_FILE=/tmp/ac.log ./monitor.py
+```
+
 to set values just publish to /aircon/mac_address/option/value/set  new_value  :
 ```
 /aircon/b4430dce73f1/temp/set 20
