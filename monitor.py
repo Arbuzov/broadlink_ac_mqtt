@@ -276,11 +276,8 @@ def start():
 	else:
 		if os.path.exists(data_dir+'/settings/config.yml'):
 			config_file_path = data_dir+'/settings/config.yml'
-		# elif  os.path.exists(data_dir+'\\settings\\config.yml'):
-		# 	config_file_path = data_dir+'\\settings\\config.yml'
 		else:
-			# config_file_path = data_dir+'/config.yml'
-			config_file_path = data_dir+'\\settings\config.yml'
+			config_file_path = data_dir+'/config.yml'
 		
 	
 	##LogFile -- CLI > env LOG_FILE > default
